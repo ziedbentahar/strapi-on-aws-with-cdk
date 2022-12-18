@@ -49,6 +49,10 @@ export class ECSServiceStack extends NestedStack {
           environment: {
             JWT_SECRET:
               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6InN0cmFwaSIsImlhdCI6MTUxNjIzOTAyMn0.o6XlROlpQMpMLLJji5tWkj4NeflxB6Rqd-DAHL5Azr8",
+            APP_KEYS:
+              "DIsdjvH6cOZREEozVuKOwQ==,VYg3XDCqvKnGcn6hpebLig==,s3jk76tPnmZGYm83+YvhUA==,bMDHp2yqwf55atUcQUhksQ==",
+            API_TOKEN_SALT: "iyWhwGXRHhKI3KegOxHOiw==",
+            ADMIN_JWT_SECRET: "mrAEF6D39AVVH6+wrE2EJQ==",
             DATABASE_CLIENT: "postgres",
             DATABASE_HOST: dbHostname,
             DATABASE_PORT: dbPort,
