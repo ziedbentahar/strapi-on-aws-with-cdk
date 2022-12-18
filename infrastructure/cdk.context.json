@@ -1,0 +1,11 @@
+{
+  "availability-zones:account=657984034219:region=eu-west-1": [
+    "eu-west-1a",
+    "eu-west-1b",
+    "eu-west-1c"
+  ],
+  "hosted-zone:account=657984034219:domainName=inflow-it-labs.tk:region=eu-west-1": {
+    "Id": "/hostedzone/Z0464138316PGDCQAU55H",
+    "Name": "inflow-it-labs.tk."
+  }
+}
