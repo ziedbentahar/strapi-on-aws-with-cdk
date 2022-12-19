@@ -13,9 +13,10 @@ class StrapiStack extends Stack {
     super(scope, id, props);
 
     const vpc = new VpcStack(this, VpcStack.name, {});
+    const applicationName = this.node.tryGetContext("applicationName");
 
     const database = new DatabaseStack(this, DatabaseStack.name, {
-      applicationName: this.node.tryGetContext("applicationName"),
+      applicationName,
       vpc: vpc.vpc,
     });
 
@@ -30,6 +31,7 @@ class StrapiStack extends Stack {
       dbName: this.node.tryGetContext("applicationName"),
       dbSecret: database.dbSecret,
       vpc: vpc.vpc,
+      applicationName,
     });
 
     const records = new Route53RecordStack(this, Route53RecordStack.name, {
