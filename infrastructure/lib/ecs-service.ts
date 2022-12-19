@@ -48,6 +48,7 @@ export class ECSServiceStack extends NestedStack {
 
     const strapiSecret = new Secret(this, "StrapiSecret", {
       secretName: `${applicationName}-strapi-secret`,
+
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
           JWT_SECRET: jwt.sign({ subject: "jwt_secret" }, v4()),
@@ -55,6 +56,7 @@ export class ECSServiceStack extends NestedStack {
           API_TOKEN_SALT: nodeBase64.encode(v4()),
           ADMIN_JWT_SECRET: jwt.sign({ subject: "admin_jwt_secret" }, v4()),
         }),
+        generateStringKey: "dummy",
       },
     });
 
