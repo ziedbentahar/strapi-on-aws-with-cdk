@@ -15,7 +15,6 @@ import {
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
-import { v4 } from "uuid";
 import jwt = require("jsonwebtoken");
 // @ts-ignore no declaration available
 import nodeBase64 = require("nodejs-base64-converter");
@@ -51,12 +50,13 @@ export class ECSServiceStack extends NestedStack {
 
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
-          JWT_SECRET: jwt.sign({ subject: "jwt_secret" }, v4()),
-          APP_KEYS: [1, 2, 3].map((_) => nodeBase64.encode(v4())).join(","),
-          API_TOKEN_SALT: nodeBase64.encode(v4()),
-          ADMIN_JWT_SECRET: jwt.sign({ subject: "admin_jwt_secret" }, v4()),
+          // JWT_SECRET: jwt.sign({ subject: "jwt_secret" }, v4()),
+          // APP_KEYS: [1, 2, 3].map((_) => nodeBase64.encode(v4())).join(","),
+          // API_TOKEN_SALT: nodeBase64.encode(v4()),
+          // ADMIN_JWT_SECRET: jwt.sign({ subject: "admin_jwt_secret" }, v4()),
         }),
-        generateStringKey: "dummy",
+        generateStringKey: "StrapiKey",
+        excludePunctuation: true,
       },
     });
 
@@ -71,16 +71,16 @@ export class ECSServiceStack extends NestedStack {
             DATABASE_CREDENTIALS: ecs_Secret.fromSecretsManager(dbSecret),
             JWT_SECRET: ecs_Secret.fromSecretsManager(
               strapiSecret,
-              "JWT_SECRET"
+              "StrapiKey"
             ),
-            APP_KEYS: ecs_Secret.fromSecretsManager(strapiSecret, "APP_KEYS"),
+            APP_KEYS: ecs_Secret.fromSecretsManager(strapiSecret, "StrapiKey"),
             API_TOKEN_SALT: ecs_Secret.fromSecretsManager(
               strapiSecret,
-              "API_TOKEN_SALT"
+              "StrapiKey"
             ),
             ADMIN_JWT_SECRET: ecs_Secret.fromSecretsManager(
               strapiSecret,
-              "ADMIN_JWT_SECRET"
+              "StrapiKey"
             ),
           },
           image: ContainerImage.fromAsset("../cms"),
