@@ -49,12 +49,7 @@ export class ECSServiceStack extends NestedStack {
       secretName: `${applicationName}-strapi-secret`,
 
       generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          // JWT_SECRET: jwt.sign({ subject: "jwt_secret" }, v4()),
-          // APP_KEYS: [1, 2, 3].map((_) => nodeBase64.encode(v4())).join(","),
-          // API_TOKEN_SALT: nodeBase64.encode(v4()),
-          // ADMIN_JWT_SECRET: jwt.sign({ subject: "admin_jwt_secret" }, v4()),
-        }),
+        secretStringTemplate: JSON.stringify({}),
         generateStringKey: "StrapiKey",
         excludePunctuation: true,
       },
@@ -68,7 +63,14 @@ export class ECSServiceStack extends NestedStack {
         cluster,
         taskImageOptions: {
           secrets: {
-            DATABASE_CREDENTIALS: ecs_Secret.fromSecretsManager(dbSecret),
+            DATABASE_USERNAME: ecs_Secret.fromSecretsManager(
+              dbSecret,
+              "username"
+            ),
+            DATABASE_PASSWORD: ecs_Secret.fromSecretsManager(
+              dbSecret,
+              "password"
+            ),
             JWT_SECRET: ecs_Secret.fromSecretsManager(
               strapiSecret,
               "StrapiKey"
@@ -86,12 +88,6 @@ export class ECSServiceStack extends NestedStack {
           image: ContainerImage.fromAsset("../cms"),
           containerPort: 1337,
           environment: {
-            // JWT_SECRET:
-            //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6InN0cmFwaSIsImlhdCI6MTUxNjIzOTAyMn0.o6XlROlpQMpMLLJji5tWkj4NeflxB6Rqd-DAHL5Azr8",
-            // APP_KEYS:
-            //   "DIsdjvH6cOZREEozVuKOwQ==,VYg3XDCqvKnGcn6hpebLig==,s3jk76tPnmZGYm83+YvhUA==,bMDHp2yqwf55atUcQUhksQ==",
-            // API_TOKEN_SALT: "iyWhwGXRHhKI3KegOxHOiw==",
-            // ADMIN_JWT_SECRET: "mrAEF6D39AVVH6+wrE2EJQ==",
             DATABASE_CLIENT: "postgres",
             DATABASE_HOST: dbHostname,
             DATABASE_PORT: dbPort,
