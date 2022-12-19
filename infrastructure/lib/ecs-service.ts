@@ -57,6 +57,8 @@ export class ECSServiceStack extends NestedStack {
             DATABASE_HOST: dbHostname,
             DATABASE_PORT: dbPort,
             DATABASE_NAME: dbName,
+            HOST: "0.0.0.0",
+            PORT: "1337",
           },
         },
         certificate,
