@@ -8,13 +8,13 @@ import {
 import { IApplicationLoadBalancer } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Construct } from "constructs";
 
-export interface Route53RecordStackProps extends NestedStackProps {
+export interface Route53RecordProps extends NestedStackProps {
   loadBalancer: IApplicationLoadBalancer;
   hostedZoneDomainName: string;
 }
 
-export class Route53RecordStack extends NestedStack {
-  constructor(scope: Construct, id: string, props: Route53RecordStackProps) {
+export class Route53Record extends NestedStack {
+  constructor(scope: Construct, id: string, props: Route53RecordProps) {
     super(scope, id, props);
 
     const { loadBalancer, hostedZoneDomainName } = props!;

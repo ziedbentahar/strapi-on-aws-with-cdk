@@ -18,23 +18,19 @@ import {
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
-interface DatabaseStackProps extends NestedStackProps {
+interface DatabaseProps extends NestedStackProps {
   vpc: IVpc;
   applicationName: string;
 }
 
-class DatabaseStack extends NestedStack {
+class Database extends NestedStack {
   public readonly dbCluster: IDatabaseCluster;
   public readonly dbSecret: ISecret;
   public readonly dbName: string;
 
-  constructor(scope: Construct, id: string, props?: DatabaseStackProps) {
+  constructor(scope: Construct, id: string, props?: DatabaseProps) {
     super(scope, id, props);
-
     const { vpc, applicationName } = props!;
-
-    const databaseName = applicationName;
-
     const dbSecurityGroup = new SecurityGroup(this, "DBClusterSecurityGroup", {
       vpc,
     });
@@ -48,7 +44,7 @@ class DatabaseStack extends NestedStack {
       secretName: `${applicationName}-credentials`,
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
-          username: databaseName,
+          username: applicationName,
         }),
         excludePunctuation: true,
         includeSpace: false,
@@ -58,7 +54,7 @@ class DatabaseStack extends NestedStack {
 
     this.dbCluster = new DatabaseCluster(this, "DbCluster", {
       engine: DatabaseClusterEngine.auroraPostgres({
-        version: AuroraPostgresEngineVersion.VER_13_6,
+        version: AuroraPostgresEngineVersion.VER_14_5,
       }),
       instances: 1,
 
@@ -66,7 +62,7 @@ class DatabaseStack extends NestedStack {
         this.dbSecret.secretValueFromJson("username").unsafeUnwrap(),
         this.dbSecret.secretValueFromJson("password")
       ),
-      defaultDatabaseName: databaseName,
+      defaultDatabaseName: applicationName,
 
       instanceProps: {
         vpc: vpc,
@@ -93,4 +89,4 @@ class DatabaseStack extends NestedStack {
   }
 }
 
-export default DatabaseStack;
+export default Database;

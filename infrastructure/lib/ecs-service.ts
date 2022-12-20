@@ -19,7 +19,7 @@ import jwt = require("jsonwebtoken");
 // @ts-ignore no declaration available
 import nodeBase64 = require("nodejs-base64-converter");
 
-export interface ECSServiceStackProps extends NestedStackProps {
+export interface ECSServiceProps extends NestedStackProps {
   vpc: IVpc;
   dbSecret: ISecret;
   certificate: ICertificate;
@@ -29,10 +29,10 @@ export interface ECSServiceStackProps extends NestedStackProps {
   applicationName: string;
 }
 
-export class ECSServiceStack extends NestedStack {
+export class ECSService extends NestedStack {
   public readonly loadBalancer: IApplicationLoadBalancer;
 
-  constructor(scope: Construct, id: string, props?: ECSServiceStackProps) {
+  constructor(scope: Construct, id: string, props?: ECSServiceProps) {
     super(scope, id, props);
 
     const {

@@ -1,30 +1,29 @@
 import { Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { CertificateStack } from "./certificate";
-import DatabaseStack from "./database";
-import { ECSServiceStack } from "./ecs-service";
-import { Route53RecordStack } from "./route53-record";
-import { VpcStack } from "./vpc";
-
-//const hostedZoneDomainName = "inflow-it-labs.tk";
+import { Certificate } from "./certificate";
+import Database from "./database";
+import { ECSService } from "./ecs-service";
+import { Route53Record } from "./route53-record";
+import { StrapiVpc } from "./vpc";
 
 class StrapiStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const vpc = new VpcStack(this, VpcStack.name, {});
+    const vpc = new StrapiVpc(this, StrapiVpc.name, {});
     const applicationName = this.node.tryGetContext("applicationName");
 
-    const database = new DatabaseStack(this, DatabaseStack.name, {
+    const database = new Database(this, Database.name, {
       applicationName,
       vpc: vpc.vpc,
     });
 
-    const certificate = new CertificateStack(this, CertificateStack.name, {
+    const certificate = new Certificate(this, Certificate.name, {
       hostedZoneDomainName: this.node.tryGetContext("hostedZoneDomainName"),
+      domainName: this.node.tryGetContext("domainName"),
     });
 
-    const ecsServiceStack = new ECSServiceStack(this, ECSServiceStack.name, {
+    const ecsServiceStack = new ECSService(this, ECSService.name, {
       certificate: certificate.certificate,
       dbHostname: database.dbCluster.clusterEndpoint.hostname.toString(),
       dbPort: database.dbCluster.clusterEndpoint.port.toString(),
@@ -34,7 +33,7 @@ class StrapiStack extends Stack {
       applicationName,
     });
 
-    const records = new Route53RecordStack(this, Route53RecordStack.name, {
+    const records = new Route53Record(this, Route53Record.name, {
       hostedZoneDomainName: this.node.tryGetContext("hostedZoneDomainName"),
       loadBalancer: ecsServiceStack.loadBalancer,
     });

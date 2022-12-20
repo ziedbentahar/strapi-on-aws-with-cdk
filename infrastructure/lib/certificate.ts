@@ -7,17 +7,18 @@ import {
 import { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
 import { Construct } from "constructs";
 
-export interface CertificateStackProps extends NestedStackProps {
+export interface CertificateProps extends NestedStackProps {
   hostedZoneDomainName: string;
+  domainName: string;
 }
 
-export class CertificateStack extends NestedStack {
+export class Certificate extends NestedStack {
   public readonly certificate: ICertificate;
 
-  constructor(scope: Construct, id: string, props: CertificateStackProps) {
+  constructor(scope: Construct, id: string, props: CertificateProps) {
     super(scope, id, props);
 
-    const { hostedZoneDomainName } = props!;
+    const { hostedZoneDomainName, domainName } = props!;
 
     const hostedZone = aws_route53.HostedZone.fromLookup(this, "hosted-zone", {
       domainName: hostedZoneDomainName,
@@ -27,7 +28,7 @@ export class CertificateStack extends NestedStack {
       this,
       "some-api-certificate",
       {
-        domainName: "strapi.inflow-it-labs.tk",
+        domainName,
         validation:
           aws_certificatemanager.CertificateValidation.fromDns(hostedZone),
       }
