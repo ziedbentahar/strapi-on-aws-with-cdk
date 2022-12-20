@@ -7,6 +7,7 @@ const app = new cdk.App({
   context: {
     applicationName: "strapi",
     hostedZoneDomainName: "inflow-it-labs.tk",
+    domainName: "strapi.inflow-it-labs.tk",
   },
 });
 const env = {
