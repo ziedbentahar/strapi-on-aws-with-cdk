@@ -16,9 +16,9 @@ class StrapiStack extends Stack {
     const hostedZoneDomainName = this.node.tryGetContext(
       "hostedZoneDomainName"
     );
-    const authorizedIPsForAdminAccess = this.node.tryGetContext(
-      "authorizedIPsForAdminAccess"
-    );
+    const authorizedIPsForAdminAccess: string[] = this.node
+      .tryGetContext("authorizedIPsForAdminAccess")
+      .split(",");
 
     const domainName = `${applicationName}.${hostedZoneDomainName}`;
 

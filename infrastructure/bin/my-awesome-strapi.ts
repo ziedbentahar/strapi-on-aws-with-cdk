@@ -3,14 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
 import { StrapiStack } from "../lib/strapi";
 
-const app = new cdk.App({
-  context: {
-    applicationName: "strapi",
-    hostedZoneDomainName: "inflow-it-labs.tk",
-    domainName: "strapi.inflow-it-labs.tk",
-    auhorizedIPAddresses: ["88.121.146.23/32"],
-  },
-});
+const app = new cdk.App();
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
   region: process.env.CDK_DEFAULT_REGION,

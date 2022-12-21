@@ -33,4 +33,4 @@ jobs:
          && npx cdk deploy --require-approval never \
           --context applicationName=strapi \
           --context hostedZoneDomainName=inflow-it-labs.tk \
-          --context domainName=strapi.inflow-it-labs.tk
+          --context authorizedIPsForAdminAccess=${{ secrets.AUTHORIZED_IP_ADDRESSES_FOR_ADMIN_ACCESS }}
