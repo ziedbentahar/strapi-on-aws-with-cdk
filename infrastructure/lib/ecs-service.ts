@@ -15,9 +15,6 @@ import {
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
-import jwt = require("jsonwebtoken");
-// @ts-ignore no declaration available
-import nodeBase64 = require("nodejs-base64-converter");
 
 export interface ECSServiceProps extends NestedStackProps {
   vpc: IVpc;
@@ -27,6 +24,7 @@ export interface ECSServiceProps extends NestedStackProps {
   dbHostname: string;
   dbPort: string;
   applicationName: string;
+  authorizedIPsForAdminAccess: string[];
 }
 
 export class ECSService extends NestedStack {
@@ -43,6 +41,7 @@ export class ECSService extends NestedStack {
       dbPort,
       certificate,
       applicationName,
+      authorizedIPsForAdminAccess,
     } = props!;
 
     const strapiSecret = new Secret(this, "StrapiSecret", {
@@ -63,27 +62,7 @@ export class ECSService extends NestedStack {
         cluster,
         taskImageOptions: {
           secrets: {
-            DATABASE_USERNAME: ecs_Secret.fromSecretsManager(
-              dbSecret,
-              "username"
-            ),
-            DATABASE_PASSWORD: ecs_Secret.fromSecretsManager(
-              dbSecret,
-              "password"
-            ),
-            JWT_SECRET: ecs_Secret.fromSecretsManager(
-              strapiSecret,
-              "StrapiKey"
-            ),
-            APP_KEYS: ecs_Secret.fromSecretsManager(strapiSecret, "StrapiKey"),
-            API_TOKEN_SALT: ecs_Secret.fromSecretsManager(
-              strapiSecret,
-              "StrapiKey"
-            ),
-            ADMIN_JWT_SECRET: ecs_Secret.fromSecretsManager(
-              strapiSecret,
-              "StrapiKey"
-            ),
+            ...this.getSecretsDefinition(dbSecret, strapiSecret),
           },
           image: ContainerImage.fromAsset("../cms"),
           containerPort: 1337,
@@ -101,7 +80,7 @@ export class ECSService extends NestedStack {
     );
 
     const policyStatement = new PolicyStatement({
-      resources: [dbSecret.secretFullArn!],
+      resources: [dbSecret.secretFullArn!, strapiSecret.secretFullArn!],
       actions: ["secretsmanager:GetSecretValue"],
     });
 
@@ -109,11 +88,34 @@ export class ECSService extends NestedStack {
       policyStatement
     );
 
+    this.restricAccessToAdmin(loadBalancedService, authorizedIPsForAdminAccess);
+
+    this.loadBalancer = loadBalancedService.loadBalancer;
+  }
+
+  private getSecretsDefinition(dbSecret: ISecret, strapiSecret: ISecret) {
+    return {
+      DATABASE_USERNAME: ecs_Secret.fromSecretsManager(dbSecret, "username"),
+      DATABASE_PASSWORD: ecs_Secret.fromSecretsManager(dbSecret, "password"),
+      JWT_SECRET: ecs_Secret.fromSecretsManager(strapiSecret, "StrapiKey"),
+      APP_KEYS: ecs_Secret.fromSecretsManager(strapiSecret, "StrapiKey"),
+      API_TOKEN_SALT: ecs_Secret.fromSecretsManager(strapiSecret, "StrapiKey"),
+      ADMIN_JWT_SECRET: ecs_Secret.fromSecretsManager(
+        strapiSecret,
+        "StrapiKey"
+      ),
+    };
+  }
+
+  private restricAccessToAdmin(
+    loadBalancedService: ApplicationLoadBalancedFargateService,
+    authorizedIPsForAdminAccess: string[]
+  ) {
     loadBalancedService.listener.addAction("/accept", {
       priority: 10,
       conditions: [
         ListenerCondition.pathPatterns(["/admin/*"]),
-        ListenerCondition.sourceIps(["88.121.146.23/32"]),
+        ListenerCondition.sourceIps(authorizedIPsForAdminAccess),
       ],
       action: ListenerAction.forward([loadBalancedService.targetGroup]),
     });
@@ -123,10 +125,8 @@ export class ECSService extends NestedStack {
       conditions: [ListenerCondition.pathPatterns(["/admin/*"])],
       action: ListenerAction.fixedResponse(403, {
         contentType: "text/html",
-        messageBody: "Your ip address is not authorized",
+        messageBody: "Your ID address is not authorized",
       }),
     });
-
-    this.loadBalancer = loadBalancedService.loadBalancer;
   }
 }

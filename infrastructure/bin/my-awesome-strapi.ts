@@ -8,6 +8,7 @@ const app = new cdk.App({
     applicationName: "strapi",
     hostedZoneDomainName: "inflow-it-labs.tk",
     domainName: "strapi.inflow-it-labs.tk",
+    auhorizedIPAddresses: ["88.121.146.23/32"],
   },
 });
 const env = {

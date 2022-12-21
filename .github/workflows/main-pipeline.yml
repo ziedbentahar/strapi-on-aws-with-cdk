@@ -28,4 +28,9 @@ jobs:
 
     - name: Build & Deploy Strapi
       run: |
-        cd infrastructure && npm install && npx cdk deploy  --require-approval never
+        cd infrastructure \
+         && npm install \
+         && npx cdk deploy --require-approval never \
+          --context applicationName=strapi \
+          --context hostedZoneDomainName=inflow-it-labs.tk \
+          --context domainName=strapi.inflow-it-labs.tk

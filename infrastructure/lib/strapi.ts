@@ -11,7 +11,16 @@ class StrapiStack extends Stack {
     super(scope, id, props);
 
     const vpc = new StrapiVpc(this, StrapiVpc.name, {});
+
     const applicationName = this.node.tryGetContext("applicationName");
+    const hostedZoneDomainName = this.node.tryGetContext(
+      "hostedZoneDomainName"
+    );
+    const authorizedIPsForAdminAccess = this.node.tryGetContext(
+      "authorizedIPsForAdminAccess"
+    );
+
+    const domainName = `${applicationName}.${hostedZoneDomainName}`;
 
     const database = new Database(this, Database.name, {
       applicationName,
@@ -19,22 +28,24 @@ class StrapiStack extends Stack {
     });
 
     const certificate = new Certificate(this, Certificate.name, {
-      hostedZoneDomainName: this.node.tryGetContext("hostedZoneDomainName"),
-      domainName: this.node.tryGetContext("domainName"),
+      hostedZoneDomainName,
+      domainName,
     });
 
     const ecsServiceStack = new ECSService(this, ECSService.name, {
       certificate: certificate.certificate,
       dbHostname: database.dbCluster.clusterEndpoint.hostname.toString(),
       dbPort: database.dbCluster.clusterEndpoint.port.toString(),
-      dbName: this.node.tryGetContext("applicationName"),
+      dbName: applicationName,
       dbSecret: database.dbSecret,
       vpc: vpc.vpc,
       applicationName,
+      authorizedIPsForAdminAccess,
     });
 
     const records = new Route53Record(this, Route53Record.name, {
-      hostedZoneDomainName: this.node.tryGetContext("hostedZoneDomainName"),
+      hostedZoneDomainName,
+      applicationName,
       loadBalancer: ecsServiceStack.loadBalancer,
     });
   }
