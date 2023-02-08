@@ -1,5 +1,7 @@
 # strapi-on-aws-with-cdk
 
+[![strapi on aws pipeline](https://github.com/ziedbentahar/strapi-on-aws-with-cdk/actions/workflows/main-pipeline.yml/badge.svg)](https://github.com/ziedbentahar/strapi-on-aws-with-cdk/actions/workflows/main-pipeline.yml)
+
 Full code and Github actions workflow for this bog post:
 
 https://medium.com/@zied-ben-tahar/deploying-strapi-cms-on-aws-with-ecs-on-fargate-aurora-serverless-v2-and-cdk-3c9b9ec732a3
