@@ -1,6 +1,5 @@
-import { Aspects, NestedStack, NestedStackProps } from "aws-cdk-lib";
+import { NestedStack, NestedStackProps } from "aws-cdk-lib";
 import {
-  InstanceType,
   IVpc,
   Peer,
   Port,
@@ -9,7 +8,7 @@ import {
 } from "aws-cdk-lib/aws-ec2";
 import {
   AuroraPostgresEngineVersion,
-  CfnDBCluster,
+  ClusterInstance,
   Credentials,
   DatabaseCluster,
   DatabaseClusterEngine,
@@ -52,39 +51,27 @@ class Database extends NestedStack {
       },
     });
 
-    this.dbCluster = new DatabaseCluster(this, "DbCluster", {
+    this.dbCluster = new DatabaseCluster(this, "Database", {
       engine: DatabaseClusterEngine.auroraPostgres({
-        version: AuroraPostgresEngineVersion.VER_14_5,
+        version: AuroraPostgresEngineVersion.VER_14_7,
       }),
-      instances: 1,
-
+      defaultDatabaseName: applicationName,
+      writer: ClusterInstance.serverlessV2("writer"),
+      serverlessV2MinCapacity: 0.5,
+      serverlessV2MaxCapacity: 1,
+      readers: [
+        ClusterInstance.serverlessV2("reader", { scaleWithWriter: true }),
+      ],
+      vpc,
+      vpcSubnets: vpc.selectSubnets({
+        subnetType: SubnetType.PRIVATE_ISOLATED,
+      }),
       credentials: Credentials.fromPassword(
         this.dbSecret.secretValueFromJson("username").unsafeUnwrap(),
         this.dbSecret.secretValueFromJson("password")
       ),
-      defaultDatabaseName: applicationName,
-
-      instanceProps: {
-        vpc: vpc,
-        instanceType: new InstanceType("serverless"),
-        autoMinorVersionUpgrade: true,
-        securityGroups: [dbSecurityGroup],
-        vpcSubnets: vpc.selectSubnets({
-          subnetType: SubnetType.PRIVATE_ISOLATED,
-        }),
-      },
       port: 5432,
-    });
-
-    Aspects.of(this.dbCluster).add({
-      visit(node) {
-        if (node instanceof CfnDBCluster) {
-          node.serverlessV2ScalingConfiguration = {
-            minCapacity: 0.5,
-            maxCapacity: 1,
-          };
-        }
-      },
+      securityGroups: [dbSecurityGroup],
     });
   }
 }

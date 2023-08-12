@@ -111,8 +111,8 @@ export class ECSService extends NestedStack {
     loadBalancedService: ApplicationLoadBalancedFargateService,
     authorizedIPsForAdminAccess: string[]
   ) {
-    loadBalancedService.listener.addAction("/accept", {
-      priority: 10,
+    loadBalancedService.listener.addAction("accept", {
+      priority: 1,
       conditions: [
         ListenerCondition.pathPatterns(["/admin/*"]),
         ListenerCondition.sourceIps(authorizedIPsForAdminAccess),
@@ -120,12 +120,12 @@ export class ECSService extends NestedStack {
       action: ListenerAction.forward([loadBalancedService.targetGroup]),
     });
 
-    loadBalancedService.listener.addAction("/forbidden", {
-      priority: 20,
+    loadBalancedService.listener.addAction("forbidden", {
+      priority: 2,
       conditions: [ListenerCondition.pathPatterns(["/admin/*"])],
       action: ListenerAction.fixedResponse(403, {
         contentType: "text/html",
-        messageBody: "Your ID address is not authorized",
+        messageBody: "Your IP address is not authorized",
       }),
     });
   }
